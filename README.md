@@ -1,73 +1,93 @@
-# React + TypeScript + Vite
+# Room Booking – Frontend Service (React + TypeScript)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+This repository contains the **frontend microservice** of the Room Booking Platform.  
+It is a production-oriented React + TypeScript application served via **Nginx** inside Docker.
 
-Currently, two official plugins are available:
+The frontend communicates with the backend API (running in its own container) through the environment variable:  
+`VITE_API_BASE_URL`
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+---
 
-## React Compiler
+## 🚀 How to Run (Docker)
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+To build and start the frontend container:
 
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+docker compose up -d --build
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+This will:
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+- Build the React app (Vite)
+- Rewrite API URLs using the `VITE_API_BASE_URL` build-time argument
+- Serve the compiled app through **Nginx**
+- Expose it locally at:
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
 ```
+http://localhost:4173
+```
+
+---
+
+## 🧩 Environment Configuration
+
+API base URL is passed during the Docker build process using:
+
+```yaml
+args:
+  VITE_API_BASE_URL: "http://localhost:4000/api"
+```
+
+Inside the app, API calls use:
+
+```ts
+import.meta.env.VITE_API_BASE_URL
+```
+
+---
+
+## 📁 Project Structure
+
+```
+frontend/
+├── src/
+│   ├── auth/           # Auth context + API wrapper
+│   ├── components/     # UI components
+│   ├── pages/          # Login, Register, Rooms, MyBookings
+│   ├── styles/         # Minimal styles
+│   └── main.tsx        # App entry (React Router)
+├── public/             # Static assets
+├── Dockerfile          # Builds app + serves via Nginx
+├── nginx.conf          # SPA routing + static file serving
+└── docker-compose.yml  # Frontend container config
+```
+
+---
+
+## 🧪 Local Development (Without Docker)
+
+If you want to run the frontend directly:
+
+```bash
+npm install
+npm run dev
+```
+
+Navigate to:
+
+```
+http://localhost:5173
+```
+
+Make sure the backend (`http://localhost:4000`) is running.
+
+---
+
+## 🎯 Features
+
+- Login & Register  
+- Room search (location, dates, capacity)  
+- Booking flow  
+- My bookings dashboard  
+- Token-aware UI (auto-logout on expired token)  
+- Clean micro-frontend architecture  
